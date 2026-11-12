@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ book.title }} — WBooks{% endblock %}
+{% block body_class %}page-book-detail{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/flow.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="detail-hero theme-{{ book.theme_default }}">
+    <div class="container">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="{% url 'books:home' %}">Home</a>
+            <span aria-hidden="true">/</span>
+            <a href="{% url 'books:home' %}#library">Library</a>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">{{ book.title }}</span>
+        </nav>
+
+        <div class="detail-grid">
+            <div class="detail-cover-wrap reveal">
+                <div class="detail-cover theme-{{ book.theme_default }}">
+                    {% if book.cover_image %}
+                        <img src="{{ book.cover_image.url }}" alt="Cover of {{ book.title }}">
+                    {% else %}
+                        <span class="cover-spark cover-spark-a" aria-hidden="true">✦</span>
+                        <span class="cover-spark cover-spark-b" aria-hidden="true">✦</span>
+                        <span class="cover-letter" aria-hidden="true">{{ book.title|slice:":1" }}</span>
+                        <span class="cover-title">{{ book.title }}</span>
+                        <span class="cover-byline">A WBooks original</span>
+                    {% endif %}
+                </div>
+                <span class="detail-cover-shadow" aria-hidden="true"></span>
+            </div>
+
+            <div class="detail-copy">
+                <div class="detail-badges">
+                    <span class="age-pill age-pill-static">{{ book.get_age_group_display }}</span>
+                    <span class="theme-pill">{{ book.get_theme_default_display }}</span>
+                </div>
+                <h1>{{ book.title }}</h1>
+                <p class="detail-description">{{ book.description }}</p>
+
+                <dl class="detail-stats">
+                    <div>
+                        <dt>Pages</dt>
+                        <dd>{{ book.page_count }} of {{ pages_per_book }}</dd>
+                    </div>
+                    <div>
+                        <dt>Format</dt>
+                        <dd>Animated picture book</dd>
+                    </div>
+                    <div>
+                        <dt>Reading time</dt>
+                        <dd>About 10 minutes</dd>
+                    </div>
+                </dl>
+
+                <div class="detail-actions">
+                    {% if user.is_authenticated and user.is_child %}
+                        {% if progress %}
+                            <a class="button button-primary" href="{% url 'books:reader' book.slug %}">
+                                {% if progress.is_completed %}Read it again{% else %}Continue reading{% endif %}
+                            </a>
+                            <div class="progress-panel">
+                                <div class="progress-panel-head">
+                                    <div>
+                                        <strong>
+                                            {% if progress.is_completed %}
+                                                Story finished!
+                                            {% else %}
+                                                You're on page {{ progress.current_page }}
+                                            {% endif %}
+                                        </strong>
+                                        <span>{{ progress.percentage }}% of the way through</span>
+                                    </div>
+                                    <span class="progress-ring" style="--progress: {{ progress.percentage }}%">{{ progress.percentage }}%</span>
+                                </div>
+                                <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ progress.percentage }}">
+                                    <span style="width: {{ progress.percentage }}%"></span>
+                                </div>
+                                {% if pages %}
+                                    <form class="progress-form" method="post" action="{% url 'books:update_progress' book.slug %}">
+                                        {% csrf_token %}
+                                        <label for="current-page">Update my page</label>
+                                        <select id="current-page" name="current_page" class="form-select">
+                                            {% for page in pages %}
+                                                <option value="{{ page.page_number }}" {% if progress.current_page == page.page_number %}selected{% endif %}>
+                                                    Page {{ page.page_number }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        <button class="button button-primary button-sm" type="submit">Save</button>
+                                    </form>
+                                {% endif %}
+                                {% if progress.is_completed %}
+                                    <div class="detail-post-reading">
+                                        <div>
+                                            <strong>Keep the story alive</strong>
+                                            <span>Watch the recap, then take the quiz to earn badges.</span>
+                                        </div>
+                                        <div class="detail-post-actions">
+                                            <a class="button button-primary button-sm" href="{% url 'books:recap' book.slug %}">Story recap</a>
+                                            {% if quiz_question_count %}
+                                                <a class="button button-secondary button-sm" href="{% url 'books:quiz' book.slug %}">Take the quiz</a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <a class="button button-primary" href="{% url 'books:reader' book.slug %}">Start reading</a>
+                            <form method="post" action="{{ book.get_absolute_url }}">
+                                {% csrf_token %}
+                                <button class="button button-secondary" type="submit">Add to my shelf</button>
+                            </form>
+                            <a class="button button-ghost" href="{% url 'books:child_dashboard' %}">My reading shelf</a>
+                        {% endif %}
+                    {% elif user.is_authenticated and user.is_parent %}
+                        <a class="button button-primary" href="{% url 'books:parent_dashboard' %}">View family dashboard</a>
+                        <p class="detail-note">Young readers add stories to their own shelf from their account.</p>
+                    {% else %}
+                        <a class="button button-primary" href="{% url 'books:register' %}">Create an account to read</a>
+                        <a class="button button-secondary" href="{% url 'books:login' %}">Log in</a>
+                    {% endif %}
+                </div>
+
+                <p class="detail-safety">
+                    <span aria-hidden="true">✦</span>
+                    Ad-free, kid-safe and made for shared reading.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section detail-pages">
+    <div class="container">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">A peek inside</p>
+                <h2>Eight little moments of wonder.</h2>
+            </div>
+            <span class="page-pill">{{ book.page_count }} illustrated pages</span>
+        </div>
+
+        {% if pages %}
+            <div class="page-strip">
+                {% for page in pages %}
+                    <article class="page-tile reveal">
+                        <span class="page-tile-number">{{ page.page_number }}</span>
+                        <div class="page-tile-body">
+                            <span class="page-tile-animation">{{ page.get_animation_type_display }}</span>
+                            {% if page.page_number == 1 %}
+                                <p>{{ page.content_text|truncatewords:22 }}</p>
+                            {% else %}
+                                <p class="page-tile-locked">Illustrated page · opens in the reader</p>
+                            {% endif %}
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state empty-state-compact">
+                <span class="empty-glyph" aria-hidden="true">✦</span>
+                <h3>The pages are still being painted.</h3>
+                <p>Check back soon — this story is being prepared for the shelf.</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="section detail-more">
+    <div class="container">
+        <div class="detail-more-band">
+            <div>
+                <p class="eyebrow">Keep the wonder going</p>
+                <h2>There is always another world waiting.</h2>
+            </div>
+            <a class="button button-primary" href="{% url 'books:home' %}#library">Browse more stories</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

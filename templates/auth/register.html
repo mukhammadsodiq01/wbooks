@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Create your account — WBooks{% endblock %}
+{% block body_class %}page-auth{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="container auth-shell">
+        <aside class="auth-aside auth-aside-register">
+            <span class="auth-aside-spark" aria-hidden="true">✦</span>
+            <p class="eyebrow eyebrow-light">Join WBooks</p>
+            <h2>Every great reader starts with one page.</h2>
+            <p>Create a young reader profile, or a guardian account that keeps the whole family's stories in one place.</p>
+            <ul class="auth-benefits">
+                <li><span aria-hidden="true">✦</span> Eight-page illustrated stories</li>
+                <li><span aria-hidden="true">✦</span> Progress saved automatically</li>
+                <li><span aria-hidden="true">✦</span> A family dashboard for grown-ups</li>
+                <li><span aria-hidden="true">✦</span> No ads, ever</li>
+            </ul>
+            <div class="auth-aside-art" aria-hidden="true">
+                <span class="book-spine spine-one"></span>
+                <span class="book-spine spine-two"></span>
+                <span class="book-spine spine-three"></span>
+                <span class="book-spine spine-four"></span>
+            </div>
+        </aside>
+
+        <div class="auth-card auth-card-wide">
+            <div class="auth-heading">
+                <p class="eyebrow">Free account</p>
+                <h1>Make wonder a habit.</h1>
+                <p>Already a member? <a href="{% url 'books:login' %}">Log in here</a>.</p>
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="form-alert" role="alert">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="post" class="auth-form" data-register-form>
+                {% csrf_token %}
+
+                <fieldset class="role-fieldset">
+                    <legend>{{ form.role.label }}</legend>
+                    <div class="role-options">
+                        {% for radio in form.role %}
+                            <label class="role-option">
+                                {{ radio.tag }}
+                                <span class="role-option-body">
+                                    <span class="role-option-icon" aria-hidden="true">
+                                        {% if radio.data.value == "parent" %}
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                                <path d="M8 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM16.5 11a3 3 0 1 0 0-6"/>
+                                                <path d="M2.5 20v-1.5A5.5 5.5 0 0 1 8 13h1a5.5 5.5 0 0 1 5.5 5.5V20M16 13h.8a4.7 4.7 0 0 1 4.7 4.7V20"/>
+                                            </svg>
+                                        {% else %}
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                                <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Z"/>
+                                                <path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H20M9 7h7"/>
+                                            </svg>
+                                        {% endif %}
+                                    </span>
+                                    <span class="role-option-copy">
+                                        <strong>{{ radio.choice_label }}</strong>
+                                        <span>
+                                            {% if radio.data.value == "parent" %}
+                                                See every linked reader's shelf and progress.
+                                            {% else %}
+                                                Your own shelf, reading streak and adventures.
+                                            {% endif %}
+                                        </span>
+                                    </span>
+                                </span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                    {% for error in form.role.errors %}
+                        <p class="field-error">{{ error }}</p>
+                    {% endfor %}
+                </fieldset>
+
+                <div class="form-grid">
+                    {% include "partials/field.html" with field=form.display_name %}
+                    {% include "partials/field.html" with field=form.username %}
+                    {% include "partials/field.html" with field=form.email %}
+                    <div data-parent-email-field>
+                        {% include "partials/field.html" with field=form.parent_email %}
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    {% include "partials/field.html" with field=form.password1 %}
+                    {% include "partials/field.html" with field=form.password2 %}
+                </div>
+
+                <button class="button button-primary button-block" type="submit">Create my WBooks account</button>
+                <p class="form-legal">By joining you agree to our friendly house rules: be kind, read widely, and let your imagination wander.</p>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

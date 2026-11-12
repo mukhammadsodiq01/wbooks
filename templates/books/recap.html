@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Recap: {{ book.title }} — WBooks{% endblock %}
+{% block body_class %}page-recap theme-{{ book.theme_default }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/flow.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="flow-hero recap-hero">
+    <div class="container">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="{% url 'books:home' %}">Home</a>
+            <span aria-hidden="true">/</span>
+            <a href="{{ book.get_absolute_url }}">{{ book.title }}</a>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">Recap</span>
+        </nav>
+
+        <div class="recap-hero-grid">
+            <div class="recap-hero-copy">
+                <p class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span>Story recap</p>
+                <h1>Let's hold on to <span class="highlight">{{ book.title }}</span>.</h1>
+                <p class="flow-lead">{{ storyboard.moral }}</p>
+
+                <div class="flow-meta">
+                    <span class="flow-pill"><span aria-hidden="true">✓</span> Story finished</span>
+                    <span class="flow-pill">{{ progress.current_page }} of {{ pages_per_book|default:8 }} pages</span>
+                    <span class="flow-pill">{{ quiz_count }} quiz question{{ quiz_count|pluralize }}</span>
+                </div>
+
+                <div class="flow-actions">
+                    {% if quiz_count %}
+                        <a class="button button-primary" href="{% url 'books:quiz' book.slug %}">
+                            Start the quiz
+                            <span aria-hidden="true">→</span>
+                        </a>
+                    {% else %}
+                        <span class="button button-secondary is-disabled" aria-disabled="true">Quiz coming soon</span>
+                    {% endif %}
+                    <a class="button button-ghost" href="{% url 'books:reader' book.slug %}">Read it again</a>
+                </div>
+            </div>
+
+            <div class="recap-medallion" aria-hidden="true">
+                <span class="recap-medallion-orbit"></span>
+                <span class="recap-medallion-orbit recap-medallion-orbit-b"></span>
+                <span class="recap-medallion-core">
+                    <span class="recap-medallion-letter">{{ book.title|slice:":1" }}</span>
+                    <span class="recap-medallion-label">{{ book.get_theme_default_display }}</span>
+                </span>
+                <span class="recap-medallion-spark recap-medallion-spark-a">✦</span>
+                <span class="recap-medallion-spark recap-medallion-spark-b">✦</span>
+                <span class="recap-medallion-spark recap-medallion-spark-c">✦</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section recap-player-section">
+    <div class="container">
+        <div class="panel-heading">
+            <div>
+                <p class="eyebrow">The story in scenes</p>
+                <h2>Press play and watch it bloom again.</h2>
+            </div>
+            <span class="page-pill">{{ storyboard.beats|length }} animated scenes</span>
+        </div>
+
+        <div
+            class="recap-player"
+            data-recap
+            data-book-slug="{{ book.slug }}"
+            data-total-scenes="{{ storyboard.beats|length }}"
+            tabindex="0"
+            role="region"
+            aria-label="Animated story recap"
+        >
+            {% if book.recap_video_url %}
+                <div class="recap-video">
+                    <div class="recap-video-head">
+                        <span class="recap-video-dot" aria-hidden="true"></span>
+                        <div>
+                            <strong>Story film</strong>
+                            <span>Watch the animated recap, then try the quiz.</span>
+                        </div>
+                    </div>
+                    <video
+                        class="recap-video-player"
+                        controls
+                        preload="metadata"
+                        playsinline
+                        {% if storyboard.beats.0.illustration_url %}poster="{{ storyboard.beats.0.illustration_url }}"{% endif %}
+                    >
+                        <source src="{{ book.recap_video_url }}" type="video/mp4">
+                        Your browser does not support the story video. The animated
+                        storyboard below tells the same tale.
+                    </video>
+                </div>
+            {% endif %}
+
+            <div class="recap-board">
+                <div class="recap-stage" data-recap-stage aria-live="polite">
+                    <span class="recap-sky" aria-hidden="true"></span>
+                    <span class="recap-stars" aria-hidden="true"></span>
+                    {% for beat in storyboard.beats %}
+                        <article
+                            class="recap-scene recap-scene-{{ beat.scene }}{% if forloop.first %} is-active{% endif %}"
+                            data-recap-scene
+                            data-scene-index="{{ forloop.counter0 }}"
+                            aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}"
+                        >
+                            <div class="recap-scene-art">
+                                {% if beat.illustration_url %}
+                                    <img
+                                        src="{{ beat.illustration_url }}"
+                                        alt="Illustration for page {{ beat.page_number }} of {{ book.title }}"
+                                        loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                                    >
+                                {% else %}
+                                    <span class="recap-art-sun" aria-hidden="true"></span>
+                                    <span class="recap-art-moon" aria-hidden="true"></span>
+                                    <span class="recap-art-hill recap-art-hill-a" aria-hidden="true"></span>
+                                    <span class="recap-art-hill recap-art-hill-b" aria-hidden="true"></span>
+                                    <span class="recap-art-tree" aria-hidden="true"></span>
+                                    <span class="recap-art-spark recap-art-spark-a" aria-hidden="true">✦</span>
+                                    <span class="recap-art-spark recap-art-spark-b" aria-hidden="true">✦</span>
+                                    <span class="recap-art-number" aria-hidden="true">{{ beat.page_number }}</span>
+                                {% endif %}
+                                <span class="recap-scene-tag">Page {{ beat.page_number }}</span>
+                            </div>
+
+                            <div class="recap-scene-copy">
+                                <p class="recap-scene-label">
+                                    <span class="recap-scene-dot" aria-hidden="true"></span>
+                                    Scene {{ forloop.counter }} · {{ beat.label }}
+                                </p>
+                                <p class="recap-scene-caption">{{ beat.caption }}</p>
+                                <span class="recap-scene-progress">
+                                    <span style="width: {% widthratio forloop.counter storyboard.beats|length 100 %}%"></span>
+                                </span>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+
+                <div class="recap-controls">
+                    <button class="recap-play" type="button" data-recap-play aria-pressed="false">
+                        <span class="recap-play-icon" aria-hidden="true">
+                            <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>
+                            <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+                        </span>
+                        <span data-recap-play-text>Play the storyboard</span>
+                    </button>
+
+                    <div class="recap-stepper">
+                        <button class="recap-arrow" type="button" data-recap-prev aria-label="Previous scene">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 5 8 12l7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
+                        <div class="recap-dots" data-recap-dots role="group" aria-label="Choose a scene">
+                            {% for beat in storyboard.beats %}
+                                <button
+                                    class="recap-dot{% if forloop.first %} is-current{% endif %}"
+                                    type="button"
+                                    data-recap-dot="{{ forloop.counter0 }}"
+                                    aria-label="Scene {{ forloop.counter }}: {{ beat.label }}"
+                                    aria-current="{% if forloop.first %}step{% else %}false{% endif %}"
+                                ></button>
+                            {% endfor %}
+                        </div>
+                        <button class="recap-arrow" type="button" data-recap-next aria-label="Next scene">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 5 7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
+                    </div>
+
+                    <span class="recap-counter">
+                        <strong data-recap-current>1</strong> / <span data-recap-total>{{ storyboard.beats|length }}</span>
+                    </span>
+                </div>
+
+                <div class="recap-track" aria-hidden="true">
+                    <span class="recap-track-fill" data-recap-track style="width: {% widthratio 1 storyboard.beats|length 100 %}%"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section recap-lessons-section">
+    <div class="container">
+        <div class="panel-heading">
+            <div>
+                <p class="eyebrow">Carry it with you</p>
+                <h2>Three little lessons from the story.</h2>
+            </div>
+        </div>
+
+        <div class="recap-lesson-grid">
+            {% for lesson in storyboard.lessons %}
+                <article class="recap-lesson reveal">
+                    <span class="recap-lesson-number" aria-hidden="true">0{{ forloop.counter }}</span>
+                    <span class="recap-lesson-glyph" aria-hidden="true">✦</span>
+                    <p>{{ lesson }}</p>
+                </article>
+            {% endfor %}
+        </div>
+
+        <div class="recap-moral">
+            <span class="recap-moral-mark" aria-hidden="true">“</span>
+            <p>{{ storyboard.moral }}</p>
+            <span class="recap-moral-source">— {{ book.title }}</span>
+        </div>
+    </div>
+</section>
+
+{% if new_badges %}
+    <section class="section recap-rewards-section">
+        <div class="container">
+            <div class="recap-rewards">
+                <div class="recap-rewards-copy">
+                    <p class="eyebrow">New rewards</p>
+                    <h2>You unlocked {{ new_badges|length }} badge{{ new_badges|length|pluralize }}!</h2>
+                    <p>Every finished story adds a little shine to your shelf.</p>
+                </div>
+                <div class="recap-reward-row">
+                    {% for award in new_badges %}
+                        <article class="badge-card is-earned badge-card-compact">
+                            <span class="badge-card-icon" aria-hidden="true">{{ award.badge.icon }}</span>
+                            <div>
+                                <h3>{{ award.badge.name }}</h3>
+                                <p>{{ award.badge.description }}</p>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+                <a class="text-link" href="{% url 'books:child_dashboard' %}#my-badges">See all my badges <span aria-hidden="true">→</span></a>
+            </div>
+        </div>
+    </section>
+{% endif %}
+
+<section class="section recap-quiz-section">
+    <div class="container">
+        <div class="recap-quiz-band">
+            <div>
+                <p class="eyebrow">One last adventure</p>
+                <h2>Ready to see what you remember?</h2>
+                <p>
+                    {% if quiz_count %}
+                        Answer {{ quiz_count }} question{{ quiz_count|pluralize }} about {{ book.title }} and unlock your reward badges.
+                    {% else %}
+                        This story's quiz is still being written — your recap is ready to enjoy now.
+                    {% endif %}
+                </p>
+            </div>
+            <div class="recap-quiz-actions">
+                {% if quiz_count %}
+                    <a class="button button-primary" href="{% url 'books:quiz' book.slug %}">
+                        Take the quiz <span aria-hidden="true">→</span>
+                    </a>
+                {% endif %}
+                {% if general_quiz_count %}
+                    <a class="button button-secondary" href="{% url 'books:general_quiz' %}">Try the Wonder Quiz</a>
+                {% endif %}
+                <a class="button button-ghost" href="{% url 'books:child_dashboard' %}">Back to my shelf</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/recap.js' %}" defer></script>
+{% endblock %}

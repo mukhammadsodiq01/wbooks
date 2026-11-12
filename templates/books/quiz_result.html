@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Quiz results — WBooks{% endblock %}
+{% block body_class %}page-quiz-result{% if result.book %} theme-{{ result.book.theme_default }}{% endif %}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/flow.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="result-hero{% if result.score_percentage == 100 %} is-perfect{% endif %}">
+    <div class="container">
+        <div class="result-hero-inner">
+            <div class="result-copy">
+                <p class="eyebrow">
+                    <span class="eyebrow-dot" aria-hidden="true"></span>
+                    Quiz complete
+                </p>
+                <h1>
+                    {% if result.score_percentage == 100 %}
+                        Perfect score. You're a Quiz Master!
+                    {% elif result.is_passed %}
+                        Brilliant work — you know this story!
+                    {% else %}
+                        Good try. Every reader grows with practice.
+                    {% endif %}
+                </h1>
+                <p class="flow-lead">
+                    {% if result.book %}
+                        You finished the {{ result.book.title }} quiz with
+                        {{ result.correct_answers }} of {{ result.total_questions }} correct.
+                    {% else %}
+                        You finished the WBooks Wonder Quiz with
+                        {{ result.correct_answers }} of {{ result.total_questions }} correct.
+                    {% endif %}
+                </p>
+
+                <div class="result-actions">
+                    {% if result.book %}
+                        <a class="button button-primary" href="{% url 'books:quiz' result.book.slug %}">Try it again</a>
+                        <a class="button button-secondary" href="{% url 'books:recap' result.book.slug %}">Back to recap</a>
+                    {% else %}
+                        <a class="button button-primary" href="{% url 'books:general_quiz' %}">Try it again</a>
+                        <a class="button button-secondary" href="{% url 'books:child_dashboard' %}">Back to my shelf</a>
+                    {% endif %}
+                    <a class="button button-ghost" href="{% url 'books:child_dashboard' %}#my-badges">My badges</a>
+                </div>
+            </div>
+
+            <div class="result-score" style="--score: {{ result.score_percentage }}%" aria-label="Score {{ result.score_percentage }} percent">
+                <span class="result-score-orbit"></span>
+                <span class="result-score-core">
+                    <strong>{{ result.score_percentage }}<span>%</span></strong>
+                    <span class="result-score-label">
+                        {{ result.correct_answers }} / {{ result.total_questions }} correct
+                    </span>
+                </span>
+                <span class="result-score-spark result-score-spark-a" aria-hidden="true">✦</span>
+                <span class="result-score-spark result-score-spark-b" aria-hidden="true">✦</span>
+            </div>
+        </div>
+
+        <div class="result-stats">
+            <article class="result-stat">
+                <span class="result-stat-icon is-correct" aria-hidden="true">✓</span>
+                <div><strong>{{ result.correct_answers }}</strong><span>correct answers</span></div>
+            </article>
+            <article class="result-stat">
+                <span class="result-stat-icon is-missed" aria-hidden="true">✦</span>
+                <div><strong>{{ result.incorrect_answers }}</strong><span>to learn from</span></div>
+            </article>
+            <article class="result-stat">
+                <span class="result-stat-icon is-badge" aria-hidden="true">🏅</span>
+                <div><strong>{{ awarded_badges|length }}</strong><span>new badge{{ awarded_badges|length|pluralize }}</span></div>
+            </article>
+            <article class="result-stat">
+                <span class="result-stat-icon is-score" aria-hidden="true">★</span>
+                <div><strong>{% if result.is_passed %}Passed{% else %}Keep going{% endif %}</strong><span>
+                    {% if result.is_passed %}70% or more{% else %}70% unlocks the pass{% endif %}
+                </span></div>
+            </article>
+        </div>
+    </div>
+</section>
+
+{% if awarded_badges %}
+    <section class="section result-badges-section">
+        <div class="container">
+            <div class="panel-heading">
+                <div>
+                    <p class="eyebrow">Rewards unlocked</p>
+                    <h2>New badges for your shelf.</h2>
+                </div>
+            </div>
+            <div class="result-badge-grid">
+                {% for badge in awarded_badges %}
+                    <article class="badge-card is-earned result-badge-pop">
+                        <span class="badge-card-icon" aria-hidden="true">{{ badge.icon }}</span>
+                        <div>
+                            <p class="badge-card-kicker">Badge unlocked</p>
+                            <h3>{{ badge.name }}</h3>
+                            <p>{{ badge.description }}</p>
+                        </div>
+                        <span class="badge-card-spark" aria-hidden="true">✦</span>
+                    </article>
+                {% endfor %}
+            </div>
+            <a class="text-link result-badge-link" href="{% url 'books:child_dashboard' %}#my-badges">See every badge <span aria-hidden="true">→</span></a>
+        </div>
+    </section>
+{% endif %}
+
+<section class="section result-review-section">
+    <div class="container">
+        <div class="panel-heading">
+            <div>
+                <p class="eyebrow">Your answers</p>
+                <h2>{% if missed %}A closer look at the tricky ones.{% else %}A perfect run, answer by answer.{% endif %}</h2>
+            </div>
+            <span class="page-pill">{{ result.total_questions }} question{{ result.total_questions|pluralize }}</span>
+        </div>
+
+        <div class="result-review">
+            {% for entry in result.review %}
+                <article class="review-card {% if entry.is_correct %}is-correct{% else %}is-missed{% endif %}">
+                    <div class="review-card-head">
+                        <span class="review-status" aria-hidden="true">{% if entry.is_correct %}✓{% else %}✦{% endif %}</span>
+                        <div>
+                            <p class="review-question">{{ entry.question_text }}</p>
+                            <span class="review-label">
+                                {% if entry.is_correct %}Correct{% else %}Let's learn this one{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    <dl class="review-answers">
+                        <div>
+                            <dt>Your answer</dt>
+                            <dd>{% if entry.selected_text %}{{ entry.selected_text }}{% else %}<em>No answer chosen</em>{% endif %}</dd>
+                        </div>
+                        {% if not entry.is_correct %}
+                            <div>
+                                <dt>Correct answer</dt>
+                                <dd>{{ entry.correct_text }}</dd>
+                            </div>
+                        {% endif %}
+                    </dl>
+                    {% if entry.explanation %}
+                        <p class="review-explanation"><span aria-hidden="true">✦</span>{{ entry.explanation }}</p>
+                    {% endif %}
+                </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="section result-next-section">
+    <div class="container">
+        <div class="result-next-band">
+            <div>
+                <p class="eyebrow">Keep the adventure going</p>
+                <h2>There's another story waiting.</h2>
+                <p>Every finished book and quiz adds a new badge to your shelf.</p>
+            </div>
+            <div class="result-next-actions">
+                <a class="button button-primary" href="{% url 'books:home' %}#library">Find a new story</a>
+                {% if general_quiz_count and result.book %}
+                    <a class="button button-secondary" href="{% url 'books:general_quiz' %}">Try the Wonder Quiz</a>
+                {% endif %}
+                {% if result.book %}
+                    <a class="button button-ghost" href="{{ result.book.get_absolute_url }}">Story page</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

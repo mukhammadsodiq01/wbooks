@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ quiz_title }} — WBooks{% endblock %}
+{% block body_class %}page-quiz{% if book %} theme-{{ book.theme_default }}{% endif %}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/flow.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="flow-hero quiz-hero">
+    <div class="container">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="{% url 'books:home' %}">Home</a>
+            <span aria-hidden="true">/</span>
+            {% if book %}
+                <a href="{{ book.get_absolute_url }}">{{ book.title }}</a>
+                <span aria-hidden="true">/</span>
+            {% else %}
+                <a href="{% url 'books:child_dashboard' %}">My shelf</a>
+                <span aria-hidden="true">/</span>
+            {% endif %}
+            <span aria-current="page">Quiz</span>
+        </nav>
+
+        <div class="quiz-hero-inner">
+            <div class="quiz-hero-copy">
+                <p class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span>{{ quiz_kicker }}</p>
+                <h1>{{ quiz_title }}</h1>
+                <p class="flow-lead">
+                    {% if book %}
+                        {{ questions|length }} quick questions about {{ book.title }}. Pick an answer,
+                        see how you did straight away, and collect your rewards at the end.
+                    {% else %}
+                        Five minutes of story wisdom from across the WBooks library.
+                        Pick an answer and find out instantly how you did.
+                    {% endif %}
+                </p>
+                <div class="flow-meta">
+                    <span class="flow-pill">{{ questions|length }} question{{ questions|length|pluralize }}</span>
+                    <span class="flow-pill">Instant feedback</span>
+                    <span class="flow-pill">Badges to unlock</span>
+                </div>
+            </div>
+
+            <div class="quiz-hero-badge" aria-hidden="true">
+                <span class="quiz-hero-glyph">?</span>
+                <span class="quiz-hero-ring"></span>
+                <span class="quiz-hero-spark quiz-hero-spark-a">✦</span>
+                <span class="quiz-hero-spark quiz-hero-spark-b">✦</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section quiz-section">
+    <div class="container quiz-layout">
+        <div class="quiz-card">
+            <div class="quiz-card-head">
+                <div>
+                    <p class="quiz-step-label">Question <strong data-quiz-current>1</strong> of <span data-quiz-total>{{ questions|length }}</span></p>
+                    <p class="quiz-card-hint" data-quiz-note>Choose the answer that feels right.</p>
+                </div>
+                <span class="quiz-live" data-quiz-live aria-live="polite">Ready when you are</span>
+            </div>
+
+            <div class="quiz-meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Quiz progress">
+                <span data-quiz-meter style="width: 0%"></span>
+            </div>
+
+            <form class="quiz-form" method="post" action="" data-quiz-form>
+                {% csrf_token %}
+                <div class="quiz-steps">
+                    {% for question in questions %}
+                        <fieldset
+                            class="quiz-step{% if forloop.first %} is-active{% endif %}"
+                            data-quiz-step
+                            data-question-id="{{ question.pk }}"
+                            data-correct="{{ question.correct_option }}"
+                            data-explanation="{{ question.explanation }}"
+                        >
+                            <legend class="sr-only">Question {{ forloop.counter }}</legend>
+
+                            <div class="quiz-question-head">
+                                <span class="quiz-question-number" aria-hidden="true">{{ forloop.counter|stringformat:"02d" }}</span>
+                                <p class="quiz-question">{{ question.question_text }}</p>
+                            </div>
+
+                            <div class="quiz-options">
+                                {% for option in question.option_items %}
+                                    <label class="quiz-option" data-quiz-option data-value="{{ option.index }}">
+                                        <input
+                                            class="quiz-radio sr-only"
+                                            type="radio"
+                                            name="question_{{ question.pk }}"
+                                            value="{{ option.index }}"
+                                            {% if forloop.parentloop.first and forloop.first %}tabindex="0"{% endif %}
+                                        >
+                                        <span class="quiz-option-key" aria-hidden="true">{{ forloop.counter }}</span>
+                                        <span class="quiz-option-text">{{ option.text }}</span>
+                                        <span class="quiz-option-mark" aria-hidden="true"></span>
+                                    </label>
+                                {% endfor %}
+                            </div>
+
+                            <div class="quiz-feedback" data-quiz-feedback role="status" hidden>
+                                <span class="quiz-feedback-icon" data-quiz-feedback-icon aria-hidden="true">✦</span>
+                                <div>
+                                    <strong data-quiz-verdict></strong>
+                                    <p data-quiz-explanation></p>
+                                </div>
+                            </div>
+                        </fieldset>
+                    {% endfor %}
+                </div>
+
+                <div class="quiz-actions">
+                    <button class="button button-primary" type="button" data-quiz-next hidden>
+                        Next question <span aria-hidden="true">→</span>
+                    </button>
+                    <button class="button button-primary" type="submit" data-quiz-submit>
+                        Finish quiz <span aria-hidden="true">✦</span>
+                    </button>
+                    <a class="button button-ghost" href="{{ back_url }}">{{ back_label }}</a>
+                </div>
+
+                <p class="quiz-fineprint">
+                    Your answers are checked again on the server, so refreshing the
+                    page can't change your score. You can retake a quiz any time.
+                </p>
+            </form>
+        </div>
+
+        <aside class="quiz-aside">
+            <div class="quiz-aside-card">
+                <span class="quiz-aside-glyph" aria-hidden="true">✦</span>
+                <h2>How the quiz works</h2>
+                <ol class="quiz-how-list">
+                    <li><span>1</span> Pick one answer for each question.</li>
+                    <li><span>2</span> Get a friendly explanation straight away.</li>
+                    <li><span>3</span> Finish to see your score and new badges.</li>
+                </ol>
+            </div>
+
+            <div class="quiz-aside-card quiz-aside-quiet">
+                <h2>While you're here</h2>
+                <p>Recap the story any time, or try a quiz from another world.</p>
+                <div class="quiz-aside-links">
+                    {% if book %}
+                        <a class="text-link" href="{% url 'books:recap' book.slug %}">Back to the recap <span aria-hidden="true">→</span></a>
+                    {% endif %}
+                    {% if book and general_quiz_count %}
+                        <a class="text-link" href="{% url 'books:general_quiz' %}">Try the Wonder Quiz <span aria-hidden="true">→</span></a>
+                    {% endif %}
+                    <a class="text-link" href="{% url 'books:child_dashboard' %}#my-badges">My badge shelf <span aria-hidden="true">→</span></a>
+                </div>
+            </div>
+        </aside>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/quiz.js' %}" defer></script>
+{% endblock %}

@@ -1,0 +1,435 @@
+/* ==========================================================================
+   WBooks — guardian dashboard
+   Reading time, quiz scores and badge progress for parents.
+   Loaded after main.css so it can lean on the shared design tokens.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Goal ring and weekly chart
+   -------------------------------------------------------------------------- */
+.pd-goal-panel {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) minmax(200px, 260px);
+    align-items: center;
+    gap: clamp(1.2rem, 3vw, 2.4rem);
+    margin-bottom: clamp(2rem, 4vw, 3rem);
+}
+
+.pd-goal-ring {
+    position: relative;
+    width: 150px;
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: conic-gradient(
+        from -90deg,
+        var(--accent) var(--goal),
+        color-mix(in srgb, var(--line) 80%, transparent) 0
+    );
+    box-shadow: var(--shadow-md);
+}
+
+.pd-goal-ring::before {
+    content: "";
+    position: absolute;
+    inset: 13px;
+    border-radius: 50%;
+    background: var(--surface);
+}
+
+.pd-goal-core {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    text-align: center;
+}
+
+.pd-goal-core strong {
+    font-family: var(--font-display);
+    font-size: 2.4rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--primary-strong);
+}
+
+.pd-goal-core span {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+
+.pd-goal-copy h2 {
+    margin-bottom: 0.5rem;
+    font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+}
+
+.pd-goal-copy .panel-copy {
+    margin: 0;
+}
+
+.pd-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+    height: 140px;
+    padding: 0.9rem 0.9rem 0.5rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--surface-sunken);
+}
+
+.pd-chart-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.45rem;
+    height: 100%;
+}
+
+.pd-chart-bar {
+    display: block;
+    width: 100%;
+    min-height: 4px;
+    border-radius: 999px 999px 6px 6px;
+    background: linear-gradient(180deg, var(--accent), var(--primary));
+    box-shadow: 0 6px 14px color-mix(in srgb, var(--primary) 26%, transparent);
+    transition: height 0.4s var(--ease-out);
+}
+
+.pd-chart-label {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+
+/* --------------------------------------------------------------------------
+   Reader cards
+   -------------------------------------------------------------------------- */
+.pd-section-heading {
+    margin-top: clamp(2rem, 5vw, 3.4rem);
+}
+
+.pd-reader-grid {
+    align-items: start;
+}
+
+.pd-reader-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.pd-reader-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.5rem;
+}
+
+.pd-reader-metrics div {
+    padding: 0.6rem 0.5rem;
+    border-radius: 12px;
+    background: var(--surface-sunken);
+    text-align: center;
+}
+
+.pd-reader-metrics strong {
+    display: block;
+    font-size: 1.2rem;
+}
+
+.pd-reader-metrics span {
+    font-size: 0.66rem;
+    letter-spacing: 0.04em;
+}
+
+.pd-score-row {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+    padding: 0.65rem 0.8rem;
+    border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--line));
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--primary-soft) 42%, var(--surface));
+}
+
+.pd-score-label {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--primary-strong);
+}
+
+.pd-score-value {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--ink);
+}
+
+.pd-score-meta {
+    margin-left: auto;
+    font-size: 0.74rem;
+    color: var(--ink-soft);
+}
+
+.pd-progress-list {
+    margin: 0;
+}
+
+.pd-quiz-heading {
+    margin: 0 0 0.5rem;
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+
+.pd-quiz-list ul,
+.pd-recent-list {
+    display: grid;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.pd-quiz-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.7rem;
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--success);
+    border-radius: 12px;
+    background: var(--surface);
+}
+
+.pd-quiz-item.is-missed {
+    border-left-color: var(--warning);
+}
+
+.pd-quiz-score {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--ink);
+}
+
+.pd-quiz-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.84rem;
+    font-weight: 600;
+}
+
+.pd-quiz-date {
+    font-size: 0.68rem;
+    color: var(--ink-faint);
+    white-space: nowrap;
+}
+
+.pd-badge-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.pd-badge-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.65rem;
+    border: 1px solid color-mix(in srgb, var(--sun) 52%, var(--line));
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--sun) 14%, var(--surface));
+    font-size: 0.74rem;
+    font-weight: 800;
+}
+
+.pd-empty-note {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--ink-faint);
+}
+
+/* --------------------------------------------------------------------------
+   Reading-time breakdown
+   -------------------------------------------------------------------------- */
+.pd-time-panel {
+    margin-top: clamp(2rem, 4vw, 3rem);
+}
+
+.pd-time-list {
+    display: grid;
+    gap: 0.75rem;
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.pd-time-list li {
+    display: grid;
+    gap: 0.35rem;
+}
+
+.pd-time-copy {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.pd-time-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.pd-time-value {
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: var(--primary-strong);
+}
+
+.pd-time-bar {
+    height: 8px;
+    border-radius: 999px;
+    background: var(--surface-sunken);
+    overflow: hidden;
+}
+
+.pd-time-bar span {
+    display: block;
+    height: 100%;
+    min-width: 4px;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+}
+
+/* --------------------------------------------------------------------------
+   Recent quizzes and badge catalogue
+   -------------------------------------------------------------------------- */
+.pd-recent-quizzes {
+    margin-top: 1.4rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--line);
+}
+
+.pd-recent-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.pd-recent-list li:last-child {
+    border-bottom: 0;
+}
+
+.pd-badge-panel {
+    margin-top: clamp(2rem, 4vw, 3rem);
+}
+
+.pd-badge-grid {
+    margin-top: 1rem;
+}
+
+/* --------------------------------------------------------------------------
+   Family snapshot
+   -------------------------------------------------------------------------- */
+.pd-summary-panel {
+    margin-top: 1rem;
+}
+
+.pd-summary-list {
+    display: grid;
+    gap: 0.55rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.pd-summary-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.5rem 0.7rem;
+    border-radius: 12px;
+    background: var(--surface-sunken);
+}
+
+.pd-summary-list span {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+}
+
+.pd-summary-list strong {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 800;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 1080px) {
+    .pd-goal-panel {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .pd-chart {
+        grid-column: 1 / -1;
+        height: 120px;
+    }
+}
+
+@media (max-width: 760px) {
+    .pd-goal-panel {
+        grid-template-columns: minmax(0, 1fr);
+        justify-items: center;
+        text-align: center;
+    }
+
+    .pd-goal-copy .panel-copy {
+        margin-inline: auto;
+    }
+
+    .pd-chart {
+        width: 100%;
+    }
+
+    .pd-reader-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .pd-score-meta {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pd-chart-bar,
+    .pd-time-bar span {
+        transition-duration: 0.01ms !important;
+    }
+}

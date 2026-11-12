@@ -1,0 +1,514 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}WBooks — Kitoblar jonlanadigan olam{% endblock %}
+{% block body_class %}page-home{% endblock %}
+
+{% block extra_head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/landing.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- 1. Hero Section -->
+<section class="wb-section wb-hero">
+    <div class="container">
+        <div class="wb-hero-top">
+            <span class="wb-pill wb-pill-sage">
+                <span class="wb-dot"></span> TASAVVURINGGA QANOT BER
+            </span>
+            <h1 class="wb-hero-title">
+                WBooks — Kitoblar jonlanadigan olam <span class="wb-sparkle">✦</span>
+            </h1>
+            <p class="wb-hero-lead">
+                Oddiy kitob emas, haqiqiy sarguzasht! Bolajonlar uchun 8 sahifali chiroyli rasmli ertaklar, 
+                qisqa videolar va yutuqli savollar. Mutolaa qilish endi har kuni sevimli o‘yinga aylanadi.
+            </p>
+            <div class="wb-hero-ctas">
+                {% if user.is_authenticated %}
+                    <a class="wb-btn wb-btn-primary" href="{% url 'books:dashboard' %}">
+                        {% if user.is_parent %}Oila kabinetiga o‘tish →{% else %}Mening tokchamga o‘tish →{% endif %}
+                    </a>
+                {% else %}
+                    <a class="wb-btn wb-btn-primary" href="{% url 'books:register' %}">
+                        O‘qishni boshlash →
+                    </a>
+                {% endif %}
+                <a class="wb-btn wb-btn-secondary" href="#library">
+                    Kitoblarni ko‘rish 📖
+                </a>
+            </div>
+            <ul class="wb-hero-badges">
+                <li><span class="check" aria-hidden="true">✓</span> 3 yoshdan 13+ yoshgacha</li>
+                <li><span class="check" aria-hidden="true">✓</span> Ota-onalar uchun qulay hisobot</li>
+                <li><span class="check" aria-hidden="true">✓</span> 100% xavfsiz va reklamasiz</li>
+            </ul>
+        </div>
+
+        <!-- Featured Banner Card (Exact Screenshot 1 Replica) -->
+        <div class="wb-featured-card">
+            <div class="wb-featured-content">
+                <div class="wb-featured-meta-top">
+                    <span class="wb-pill wb-pill-white">✨ HAFTANING HIKOYASI</span>
+                    <span class="wb-featured-counter">01 / 03</span>
+                </div>
+                <h2 class="wb-featured-title">
+                    Bir maktub.<br>Mingta <em>mo‘jiza</em>.
+                </h2>
+                <p class="wb-featured-desc">
+                    Kichkina tulki, olisdagi Oy va do‘stlikka to‘la bir sarguzasht. Timo bilan tanishishga tayyormisan?
+                </p>
+                <div class="wb-featured-actions">
+                    {% if featured %}
+                        <a class="wb-btn wb-btn-white" href="{{ featured.get_absolute_url }}">
+                            Hikoyani kashf et →
+                        </a>
+                    {% else %}
+                        <a class="wb-btn wb-btn-white" href="#library">
+                            Hikoyani kashf et →
+                        </a>
+                    {% endif %}
+                    <span class="wb-featured-specs">
+                        <span>📖 8 sahifa</span>
+                        <span>•</span>
+                        <span>⏱ 4 daqiqa o‘qish</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Stylized Fox & Moon Vector Illustration -->
+            <div class="wb-featured-art" aria-hidden="true">
+                <svg class="wb-featured-svg" viewBox="0 0 520 380" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Night sky gradient & stars -->
+                    <circle cx="390" cy="95" r="42" fill="#FDEEAF" opacity="0.95"/>
+                    <circle cx="390" cy="95" r="58" fill="#FDEEAF" opacity="0.2"/>
+                    <circle cx="390" cy="95" r="76" fill="#FDEEAF" opacity="0.08"/>
+                    
+                    <!-- Little stars -->
+                    <circle cx="210" cy="60" r="2.5" fill="#FFF" opacity="0.7"/>
+                    <circle cx="280" cy="40" r="3" fill="#FFEAA7" opacity="0.8"/>
+                    <circle cx="480" cy="70" r="2" fill="#FFF" opacity="0.6"/>
+                    <circle cx="160" cy="110" r="2" fill="#FFF" opacity="0.5"/>
+                    <circle cx="310" cy="120" r="2.5" fill="#FFF" opacity="0.7"/>
+
+                    <!-- Background trees -->
+                    <path d="M120 280 C120 180 200 150 240 280 Z" fill="#143226" opacity="0.85"/>
+                    <path d="M220 290 C220 160 320 140 370 290 Z" fill="#183B2D" opacity="0.9"/>
+                    <path d="M380 290 C380 180 470 170 510 290 Z" fill="#143226" opacity="0.8"/>
+
+                    <!-- Forest ground hill -->
+                    <path d="M60 380 C180 280 340 270 520 320 L520 380 L60 380 Z" fill="#25523F"/>
+                    <path d="M180 380 C300 290 420 285 520 330 L520 380 L180 380 Z" fill="#2E614B"/>
+
+                    <!-- Cute Red Fox sitting -->
+                    <g transform="translate(315, 145)">
+                        <!-- Bushy Tail -->
+                        <path d="M100 135 C135 125 155 75 140 50 C120 20 90 60 70 95 C60 112 75 130 100 135 Z" fill="#DF6836"/>
+                        <path d="M140 50 C135 32 125 24 116 35 C112 40 115 50 125 58 Z" fill="#FFFFFF"/>
+
+                        <!-- Fox Body -->
+                        <path d="M35 120 C35 70 85 70 85 120 C85 145 35 145 35 120 Z" fill="#DF6836"/>
+                        <!-- White Chest -->
+                        <path d="M48 100 C52 85 68 85 72 100 C72 118 48 118 48 100 Z" fill="#FFFFFF"/>
+
+                        <!-- Fox Head -->
+                        <path d="M18 52 C18 25 102 25 102 52 C102 85 60 98 60 98 C60 98 18 85 18 52 Z" fill="#DF6836"/>
+
+                        <!-- Fox Ears -->
+                        <!-- Left Ear -->
+                        <path d="M22 42 L35 -5 L54 32 Z" fill="#DF6836"/>
+                        <path d="M29 36 L36 8 L48 30 Z" fill="#4A2617"/>
+                        <!-- Right Ear -->
+                        <path d="M98 42 L85 -5 L66 32 Z" fill="#DF6836"/>
+                        <path d="M91 36 L84 8 L72 30 Z" fill="#4A2617"/>
+
+                        <!-- White Cheeks -->
+                        <path d="M18 52 C28 68 45 78 60 78 C75 78 92 68 102 52 C96 82 60 98 60 98 C60 98 24 82 18 52 Z" fill="#FFFFFF"/>
+
+                        <!-- Friendly Cute Eyes -->
+                        <path d="M38 52 Q44 47 50 52" stroke="#2D1A10" stroke-width="3" stroke-linecap="round" fill="none"/>
+                        <path d="M70 52 Q76 47 82 52" stroke="#2D1A10" stroke-width="3" stroke-linecap="round" fill="none"/>
+
+                        <!-- Little Fox Nose -->
+                        <ellipse cx="60" cy="68" rx="4.5" ry="3.5" fill="#2D1A10"/>
+
+                        <!-- Letter in hands (Maktub) -->
+                        <g transform="translate(43, 90)">
+                            <rect x="0" y="0" width="34" height="24" rx="4" fill="#FFFFFF" stroke="#E2D6C0" stroke-width="1.5"/>
+                            <path d="M0 2 L17 14 L34 2" stroke="#DF6836" stroke-width="1.5" fill="none"/>
+                            <circle cx="17" cy="14" r="3" fill="#DF6836"/>
+                        </g>
+
+                        <!-- Paws -->
+                        <ellipse cx="44" cy="130" rx="8" ry="6" fill="#DF6836"/>
+                        <ellipse cx="76" cy="130" rx="8" ry="6" fill="#DF6836"/>
+                    </g>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Quick Stats Strip -->
+        <div class="wb-stats-strip">
+            <div class="wb-stat-item">
+                <span class="wb-stat-num">{{ total_books|default:"3" }}+</span>
+                <span class="wb-stat-label">Sehrli original hikoyalar</span>
+            </div>
+            <div class="wb-stat-item">
+                <span class="wb-stat-num">8</span>
+                <span class="wb-stat-label">Har bir ertakda sahifa soni</span>
+            </div>
+            <div class="wb-stat-item">
+                <span class="wb-stat-num">4</span>
+                <span class="wb-stat-label">Interaktiv o‘qish muhitlari</span>
+            </div>
+            <div class="wb-stat-item">
+                <span class="wb-stat-num">100%</span>
+                <span class="wb-stat-label">Bolalar uchun xavfsiz va reklamasiz</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 2. The 4 Interactive Themes Section -->
+<section class="wb-section" id="themes" style="background: var(--wb-bg-alt); border-block: 1px solid var(--wb-border);">
+    <div class="container">
+        <div class="wb-header-center">
+            <span class="wb-pill wb-pill-sage">
+                <span class="wb-dot"></span> INTERAKTIV MUHITLAR
+            </span>
+            <h2 class="wb-section-title">Har bir kitob — o‘zgacha bir olam</h2>
+            <p class="wb-section-lead">
+                Bolangiz qaysi muhitni yoqtiradi? O‘qish jarayonida bir tugma bilan sahifa muhitini 
+                4 xil sehrli olamga aylantirish mumkin:
+            </p>
+        </div>
+
+        <div class="wb-themes-grid">
+            <!-- 1. ForestBook -->
+            <article class="wb-theme-card">
+                <div class="wb-theme-preview wb-theme-preview-forest">
+                    <span class="wb-theme-icon-badge">🌲</span>
+                </div>
+                <span class="wb-theme-tag">Tabiat qo‘ynida</span>
+                <h3 class="wb-theme-title">ForestBook</h3>
+                <p class="wb-theme-sub">O‘rmon muhiti</p>
+                <p>
+                    Yashil barglar shivirlashi, tabiat nafasi va sokin mayin ohanglar. Bolaga tinch, 
+                    huzurli va diqqatni jamlaydigan o‘qish muhitini yaratadi.
+                </p>
+            </article>
+
+            <!-- 2. IceBook -->
+            <article class="wb-theme-card">
+                <div class="wb-theme-preview wb-theme-preview-ice">
+                    <span class="wb-theme-icon-badge">❄️</span>
+                </div>
+                <span class="wb-theme-tag">Muzli sarguzasht</span>
+                <h3 class="wb-theme-title">IceBook</h3>
+                <p class="wb-theme-sub">Muzli olam</p>
+                <p>
+                    Yaltiroq muz kristallari, qishki jilo va mayin qor parchalari. Shimoliy qutb, 
+                    ayiqchalar va qiziqarli sovuq o‘lka sarguzashtlari uchun.
+                </p>
+            </article>
+
+            <!-- 3. HoloBook -->
+            <article class="wb-theme-card">
+                <div class="wb-theme-preview wb-theme-preview-holo">
+                    <span class="wb-theme-icon-badge">⚡</span>
+                </div>
+                <span class="wb-theme-tag">Kiber olam</span>
+                <h3 class="wb-theme-title">HoloBook</h3>
+                <p class="wb-theme-sub">Kelajak texnologiyasi</p>
+                <p>
+                    Yorqin neon chiziqlari, fazoviy kemalar va kelajak mo‘jizalari. Zamon bilan hamnafas 
+                    va kosmik olamga qiziqqan zukko bolajonlar uchun.
+                </p>
+            </article>
+
+            <!-- 4. ClassicBook -->
+            <article class="wb-theme-card">
+                <div class="wb-theme-preview wb-theme-preview-classic">
+                    <span class="wb-theme-icon-badge">📜</span>
+                </div>
+                <span class="wb-theme-tag">Iliq mutolaa</span>
+                <h3 class="wb-theme-title">ClassicBook</h3>
+                <p class="wb-theme-sub">Oddiy kitob</p>
+                <p>
+                    Iliq qog‘oz varaqlar, muloyim mumtoz shrift va ko‘zni hech toliqtirmaydigan qulaylik. 
+                    Xuddi qo‘lda haqiqiy sevimli kitobni ushlab o‘qigandek.
+                </p>
+            </article>
+        </div>
+    </div>
+</section>
+
+<!-- 3. How It Works in 4 Steps -->
+<section class="wb-section" id="how-it-works">
+    <div class="container">
+        <div class="wb-header-center">
+            <span class="wb-pill wb-pill-gold">
+                ✦ ODDIY VA OSON BOSQICHLAR
+            </span>
+            <h2 class="wb-section-title">Hammasi 4 ta oson qadamda ishlaydi</h2>
+            <p class="wb-section-lead">
+                Hech qanday murakkablik yo‘q. Har bir bola mustaqil o‘rganishi, ota-ona esa 
+                farzandining muvaffaqiyatlaridan quvonishi mumkin:
+            </p>
+        </div>
+
+        <div class="wb-steps-grid">
+            <!-- Step 1 -->
+            <div class="wb-step-card">
+                <span class="wb-step-num">01</span>
+                <span class="wb-step-icon wb-step-icon-1">📖</span>
+                <h3 class="wb-step-title">1. O‘qiysiz</h3>
+                <p>
+                    Har bir ertak aynan 8 ta sahifadan iborat. Chiroyli rasmlar va oson matnlar tufayli 
+                    bola charchamaydi va ertakni bir nafasda o‘qib tugatadi.
+                </p>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="wb-step-card">
+                <span class="wb-step-num">02</span>
+                <span class="wb-step-icon wb-step-icon-2">🎬</span>
+                <h3 class="wb-step-title">2. Qisqa video ko‘rasiz</h3>
+                <p>
+                    Sahifalar tugashi bilan voqealarni yodga soluvchi 30 soniyalik qiziqarli video lavha 
+                    ochiladi. Bola voqealar ketma-ketligini mustahkamlab oladi.
+                </p>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="wb-step-card">
+                <span class="wb-step-num">03</span>
+                <span class="wb-step-icon wb-step-icon-3">❓</span>
+                <h3 class="wb-step-title">3. Savollarga javob berasiz</h3>
+                <p>
+                    Hikoyani qanday tushunganini bilish uchun bolaga 3-4 ta quvnoq va oson test beriladi. 
+                    Bu bolaning xotirasi va tushunish qobiliyatini o‘stiradi.
+                </p>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="wb-step-card">
+                <span class="wb-step-num">04</span>
+                <span class="wb-step-icon wb-step-icon-4">🏅</span>
+                <h3 class="wb-step-title">4. Nishonlar yutasiz</h3>
+                <p>
+                    Har bir to‘g‘ri javob va tugatilgan kitob uchun bolaga «Oy do‘sti», «Zukko kitobxon» 
+                    kabi maxsus medallar beriladi. Bu o‘qishga mehr uyg‘otadi!
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 4. Library Section ("Bugun nima o‘qiymiz?") -->
+<section class="wb-section wb-library-section" id="library">
+    <div class="container">
+        <div class="wb-library-bar">
+            <div class="wb-library-title-group">
+                <h2>Bugun nima o‘qiymiz?</h2>
+                <p>Bir hikoya tanlang va yangi sehrli sarguzashtingizni boshlang.</p>
+            </div>
+            <div class="wb-library-controls">
+                <!-- Age filter chips -->
+                <div class="wb-filter-chips" data-age-filters role="group" aria-label="Hikoyalarni yosh bo‘yicha saralash">
+                    <button class="wb-filter-chip is-active" type="button" data-age-filter="all">Barchasi</button>
+                    <button class="wb-filter-chip" type="button" data-age-filter="3-5">3–5 yosh</button>
+                    <button class="wb-filter-chip" type="button" data-age-filter="6-8">6–8 yosh</button>
+                    <button class="wb-filter-chip" type="button" data-age-filter="9-12">9–12 yosh</button>
+                    <button class="wb-filter-chip" type="button" data-age-filter="13+">13+ yosh</button>
+                </div>
+
+                <!-- Live search box -->
+                <div class="wb-search-box">
+                    <span aria-hidden="true">🔍</span>
+                    <input type="text" id="story-search" placeholder="Hikoya izlash..." aria-label="Hikoyani nomi bo‘yicha izlash">
+                </div>
+
+                <!-- Story count badge -->
+                <span class="wb-count-badge">
+                    {{ total_books|default:"3" }} ta original hikoya ✓
+                </span>
+            </div>
+        </div>
+
+        <div class="book-grid" id="library-grid" data-book-grid>
+            {% for book in books %}
+                {% include "partials/book_card.html" with book=book %}
+            {% empty %}
+                <div class="empty-state" style="grid-column: 1 / -1; text-align: center; padding: 3rem 1rem;">
+                    <span class="empty-glyph" aria-hidden="true" style="font-size: 2.5rem; color: var(--wb-gold);">✦</span>
+                    <h3 style="font-family: var(--wb-font-serif); font-size: 1.5rem; margin: 0.8rem 0 0.4rem;">Yangi hikoyalar tayyorlanmoqda</h3>
+                    <p style="color: var(--wb-ink-soft); max-width: 480px; margin: 0 auto 1.5rem;">
+                        Sehrli ertaklar kutubxonamiz yangi kitoblar bilan to‘ldirilmoqda. 
+                        Hoziroq ro‘yxatdan o‘tib, birinchi bo‘lib xabardor bo‘ling.
+                    </p>
+                    <a class="wb-btn wb-btn-primary" href="{% url 'books:register' %}">Hisob yaratish</a>
+                </div>
+            {% endfor %}
+        </div>
+        <p class="filter-empty" data-filter-empty hidden style="text-align: center; color: var(--wb-ink-soft); padding: 2rem 0; font-size: 1rem;">
+            Bu yosh toifasida hozircha hikoyalar yo‘q — boshqa bo‘limni tanlab ko‘ring.
+        </p>
+    </div>
+</section>
+
+<!-- 5. Parent Control Section -->
+<section class="wb-section" id="for-families">
+    <div class="container">
+        <div class="wb-parent-card">
+            <div class="wb-parent-copy">
+                <span class="wb-pill wb-pill-sage">
+                    <span class="wb-dot"></span> OTA-ONALAR UCHUN MAXSUS
+                </span>
+                <h2>Farzandingizning o‘qish natijalari doim ko‘z o‘ngingizda</h2>
+                <p class="lead">
+                    Ekranga termulish endi behuda ketmayapti! Farzandingiz kitob o‘qiyapti, so‘z boyligini 
+                    oshiryapti va fikrlashni o‘rganyapti. Barcha jarayonni bitta qulay kabinetdan kuzatib boring.
+                </p>
+
+                <ul class="wb-parent-perks">
+                    <li>
+                        <span class="wb-perk-icon">⏱</span>
+                        <div class="wb-perk-text">
+                            <strong>O‘qilgan daqiqalar hisoboti</strong>
+                            <span>Farzandingiz bugun va haftada necha daqiqa mutolaa qilganini aniq ko‘rasiz.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="wb-perk-icon">🎯</span>
+                        <div class="wb-perk-text">
+                            <strong>Savol-javob va test natijalari</strong>
+                            <span>Bola hikoyani qanchalik tushunganini test ballari orqali tekshirib borasiz.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="wb-perk-icon">🛡</span>
+                        <div class="wb-perk-text">
+                            <strong>100% xavfsiz va alohida hisoblar</strong>
+                            <span>Bola o‘zining ertak tokchasida o‘qiydi, ota-ona esa nazorat qiladi. Hech qanday reklama yo‘q!</span>
+                        </div>
+                    </li>
+                </ul>
+
+                <div class="wb-parent-actions">
+                    {% if user.is_authenticated and user.is_parent %}
+                        <a class="wb-btn wb-btn-primary" href="{% url 'books:parent_dashboard' %}">
+                            Oila kabinetiga o‘tish →
+                        </a>
+                    {% else %}
+                        <a class="wb-btn wb-btn-primary" href="{% url 'books:register' %}">
+                            Ota-ona hisobini ochish →
+                        </a>
+                        <a class="wb-btn wb-btn-secondary" href="{% url 'books:login' %}">
+                            Menda hisob bor
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Parent Visual Card Preview (Matching Screenshot 1 & 3) -->
+            <div class="wb-parent-mockup" aria-hidden="true">
+                <div class="wb-mock-header">
+                    <div class="wb-mock-user">
+                        <span class="wb-mock-avatar">K</span>
+                        <div class="wb-mock-meta">
+                            <strong>Kichik kitobxon</strong>
+                            <span>Bugun birga o‘qiymiz</span>
+                        </div>
+                    </div>
+                    <span class="wb-mock-badge-status">O‘qish jarayonida</span>
+                </div>
+
+                <div class="wb-mock-card">
+                    <div class="wb-mock-card-top">
+                        <span class="wb-mock-book-name">«Oyga maktub»</span>
+                        <span class="wb-mock-page-pill">5 / 8 sahifa</span>
+                    </div>
+                    <div class="wb-mock-progress-bar">
+                        <span style="width: 65%;"></span>
+                    </div>
+                    <div class="wb-mock-time">
+                        <span>Bugungi mutolaa:</span>
+                        <strong>18 daqiqa</strong>
+                    </div>
+                </div>
+
+                <div class="wb-mock-achievement">
+                    <span class="wb-mock-medal">🏅</span>
+                    <div class="wb-mock-achieve-text">
+                        <strong>«Oy do‘sti» nishoni qo‘lga kiritildi!</strong>
+                        <span>Hikoyani muvaffaqiyatli o‘qib tugatgani uchun</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Celebratory Recap Teaser (Matching Screenshot 3) -->
+        <div class="wb-celebrate-card">
+            <span class="wb-celebrate-medal" aria-hidden="true">🏅</span>
+            <div class="wb-celebrate-eyebrow">YANA BIR OLAMNI KASHF ETING</div>
+            <h3 class="wb-celebrate-title">Barakalla, kichik kitobxon!</h3>
+            <p class="wb-celebrate-lead">
+                Har bir sahifa — yangi do‘st, har bir hikoya — unutilmas sarguzasht. 
+                Hoziroq birinchi kitobni oching va birgalikda o‘qishni boshlang!
+            </p>
+            <div>
+                <span class="wb-celebrate-chip">✓ «Oy do‘sti» nishoni sizni kutmoqda</span>
+            </div>
+            <div class="wb-celebrate-actions">
+                <a class="wb-btn wb-btn-dark" href="#library">
+                    Keyingi hikoyani top →
+                </a>
+                {% if user.is_authenticated %}
+                    <a class="wb-btn wb-btn-outline" href="{% url 'books:dashboard' %}">
+                        Mening yutuqlarimni ko‘rish
+                    </a>
+                {% else %}
+                    <a class="wb-btn wb-btn-outline" href="{% url 'books:register' %}">
+                        Bepul ro‘yxatdan o‘tish
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    /* Lightweight client-side live search for the story library */
+    (function () {
+        var searchInput = document.getElementById("story-search");
+        var bookGrid = document.querySelector("[data-book-grid]");
+        if (searchInput && bookGrid) {
+            searchInput.addEventListener("input", function () {
+                var query = searchInput.value.toLowerCase().trim();
+                var cards = bookGrid.querySelectorAll(".book-card");
+                var visibleCount = 0;
+                cards.forEach(function (card) {
+                    var text = card.textContent.toLowerCase();
+                    var match = !query || text.indexOf(query) !== -1;
+                    card.style.display = match ? "" : "none";
+                    if (match) {
+                        visibleCount++;
+                    }
+                });
+                var emptyMsg = document.querySelector("[data-filter-empty]");
+                if (emptyMsg) {
+                    emptyMsg.hidden = visibleCount > 0;
+                    if (visibleCount === 0) {
+                        emptyMsg.textContent = "«" + query + "» bo‘yicha hech qanday hikoya topilmadi.";
+                    }
+                }
+            });
+        }
+    })();
+</script>
+{% endblock %}

@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My reading shelf — WBooks{% endblock %}
+{% block body_class %}page-dashboard page-child{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/flow.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="dashboard-hero child-hero">
+    <div class="container">
+        <div class="child-hero-inner">
+            <div class="child-hero-copy">
+                <p class="eyebrow">My reading shelf</p>
+                <h1>Hi, {{ user.first_name_only }}! <span class="wave" aria-hidden="true">✦</span></h1>
+                <p class="dashboard-lead">
+                    {% if active_progress %}
+                        You have {{ active_progress|length }} story{{ active_progress|length|pluralize }} waiting for their next page.
+                    {% else %}
+                        Your shelf is ready for its first adventure. Pick a world below.
+                    {% endif %}
+                </p>
+                <a class="button button-primary" href="{% url 'books:home' %}#library">Find a new story</a>
+                {% if general_quiz_count %}
+                    <a class="button button-ghost" href="{% url 'books:general_quiz' %}">Try the Wonder Quiz</a>
+                {% endif %}
+            </div>
+            <div class="child-hero-badge" aria-hidden="true">
+                <span class="avatar avatar-xl">{{ user.first_name_only|slice:":1"|upper }}</span>
+                <span class="badge-spark badge-spark-one">✦</span>
+                <span class="badge-spark badge-spark-two">✦</span>
+                <span class="badge-ring"></span>
+            </div>
+        </div>
+
+        <div class="dashboard-stats">
+            <article class="dash-stat">
+                <span class="dash-stat-icon icon-forest" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Z"/>
+                        <path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H20"/>
+                    </svg>
+                </span>
+                <div>
+                    <strong>{{ progress_entries|length }}</strong>
+                    <span>stories on my shelf</span>
+                </div>
+            </article>
+            <article class="dash-stat">
+                <span class="dash-stat-icon icon-castle" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M12 3 4 7v6c0 4 3.4 7.2 8 8 4.6-.8 8-4 8-8V7l-8-4Z"/>
+                        <path d="m9 12 2 2 4-4"/>
+                    </svg>
+                </span>
+                <div>
+                    <strong>{{ completed_count }}</strong>
+                    <span>stories finished</span>
+                </div>
+            </article>
+            <article class="dash-stat">
+                <span class="dash-stat-icon icon-ocean" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M12 21a9 9 0 1 1 9-9"/>
+                        <path d="M12 7v5l3 2M21 16v5l-5-2.5"/>
+                    </svg>
+                </span>
+                <div>
+                    <strong>{{ pages_turned }}</strong>
+                    <span>pages explored</span>
+                </div>
+            </article>
+        </div>
+
+        {% if new_badges %}
+            <div class="dashboard-unlock" role="status">
+                <span class="dashboard-unlock-icon" aria-hidden="true">✦</span>
+                <p>
+                    New badge{{ new_badges|length|pluralize }} unlocked:
+                    {% for award in new_badges %}
+                        <strong>{{ award.badge.icon }} {{ award.badge.name }}</strong>{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
+                <a class="text-link" href="#my-badges">See my badges <span aria-hidden="true">→</span></a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="section child-body">
+    <div class="container">
+        <div class="panel-heading">
+            <div>
+                <p class="eyebrow">Continue reading</p>
+                <h2>Where did we stop?</h2>
+            </div>
+        </div>
+
+        {% if active_progress %}
+            <div class="continue-grid">
+                {% for entry in active_progress %}
+                    <article class="continue-card reveal">
+                        <div class="continue-cover theme-{{ entry.book.theme_default }}">
+                            {% if entry.book.cover_image %}
+                                <img src="{{ entry.book.cover_image.url }}" alt="Cover of {{ entry.book.title }}">
+                            {% else %}
+                                <span aria-hidden="true">{{ entry.book.title|slice:":1" }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="continue-copy">
+                            <p class="book-kicker">{{ entry.book.get_theme_default_display }}</p>
+                            <h3><a href="{{ entry.book.get_absolute_url }}">{{ entry.book.title }}</a></h3>
+                            <p>You stopped on page {{ entry.current_page }} of {{ pages_per_book }}.</p>
+                            <div class="mini-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ entry.percentage }}">
+                                <span style="width: {{ entry.percentage }}%"></span>
+                            </div>
+                            <div class="continue-foot">
+                                <span>{{ entry.percentage }}% complete</span>
+                                <a class="text-link" href="{% url 'books:reader' entry.book.slug %}">Open story <span aria-hidden="true">→</span></a>
+                            </div>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state empty-state-compact">
+                <span class="empty-glyph" aria-hidden="true">✦</span>
+                <h3>Nothing paused right now.</h3>
+                <p>Choose a story from the library and add it to your shelf — your page is always saved.</p>
+                <a class="button button-primary" href="{% url 'books:home' %}#library">Find a story</a>
+            </div>
+        {% endif %}
+
+        {% if completed_count %}
+            <div class="finished-shelf">
+                <div class="panel-heading">
+                    <div>
+                        <p class="eyebrow">Finished shelf</p>
+                        <h2>Stories you've conquered</h2>
+                    </div>
+                </div>
+                <div class="finished-list">
+                    {% for entry in progress_entries %}
+                        {% if entry.is_completed %}
+                            <div class="finished-item">
+                                <a class="finished-pill" href="{{ entry.book.get_absolute_url }}">
+                                    <span aria-hidden="true">✓</span>
+                                    {{ entry.book.title }}
+                                </a>
+                                <a class="finished-recap" href="{% url 'books:recap' entry.book.slug %}">
+                                    Recap &amp; quiz <span aria-hidden="true">→</span>
+                                </a>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        {% if badge_cards %}
+            <div class="my-badges" id="my-badges">
+                <div class="panel-heading">
+                    <div>
+                        <p class="eyebrow">My badge shelf</p>
+                        <h2>Little trophies for big adventures.</h2>
+                        <p class="my-badges-lead">
+                            {{ earned_badge_count }} of {{ badge_cards|length }} badge{{ badge_cards|length|pluralize }} unlocked so far.
+                        </p>
+                    </div>
+                    {% if general_quiz_count %}
+                        <a class="button button-secondary button-sm" href="{% url 'books:general_quiz' %}">Take the Wonder Quiz</a>
+                    {% endif %}
+                </div>
+
+                <div class="badge-grid">
+                    {% for card in badge_cards %}
+                        {% include "partials/badge_card.html" with card=card %}
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+{% if recommendations %}
+    <section class="section recommendation-section" id="next-stories">
+        <div class="container">
+            <div class="panel-heading">
+                <div>
+                    <p class="eyebrow">Next adventures</p>
+                    <h2>Stories with your name on them.</h2>
+                </div>
+                <a class="text-link" href="{% url 'books:home' %}#library">See all stories <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="book-grid">
+                {% for book in recommendations %}
+                    {% include "partials/book_card.html" with book=book %}
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+{% endif %}
+{% endblock %}

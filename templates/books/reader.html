@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Reading {{ book.title }} — WBooks{% endblock %}
+{% block body_class %}page-reader{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/themes.css' %}">
+{% endblock %}
+
+{% block content %}
+<div
+    class="reader-shell"
+    data-reader
+    data-reader-theme="{{ default_theme }}"
+    data-book-slug="{{ book.slug }}"
+    data-book-title="{{ book.title }}"
+    data-save-url="{% url 'books:api_progress' %}"
+    data-initial-page="{{ initial_page }}"
+    data-total-pages="{{ pages|length }}"
+    data-csrf="{{ csrf_token }}"
+>
+    <div class="reader-aura" aria-hidden="true">
+        <span class="reader-aura-orb reader-aura-orb-a"></span>
+        <span class="reader-aura-orb reader-aura-orb-b"></span>
+    </div>
+
+    <header class="reader-header">
+        <a class="reader-exit" href="{{ book.get_absolute_url }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M19 12H5m0 0 6-6m-6 6 6 6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Back to story</span>
+        </a>
+
+        <div class="reader-heading">
+            <p class="reader-kicker">
+                {{ book.get_theme_default_display }}
+                <span aria-hidden="true">·</span>
+                {{ book.get_age_group_display }}
+            </p>
+            <h1>{{ book.title }}</h1>
+        </div>
+
+        <div class="reader-status">
+            <span class="reader-counter" aria-label="Current page">
+                <strong data-reader-current>{{ initial_page }}</strong>
+                <span aria-hidden="true">/</span>
+                <span data-reader-total>{{ pages|length }}</span>
+            </span>
+            <span class="reader-save" data-reader-save data-state="saved" role="status" aria-live="polite">
+                <span class="reader-save-dot" aria-hidden="true"></span>
+                <span data-reader-save-text>Progress saved</span>
+            </span>
+        </div>
+    </header>
+
+    <div class="reader-toolbar">
+        <div class="reader-theme-group" role="group" aria-label="Choose a reading atmosphere">
+            <span class="reader-theme-label">Atmosphere</span>
+            {% for theme in reader_themes %}
+                <button
+                    class="reader-theme-button{% if theme.key == default_theme %} is-active{% endif %}"
+                    type="button"
+                    data-reader-theme-option="{{ theme.key }}"
+                    aria-pressed="{% if theme.key == default_theme %}true{% else %}false{% endif %}"
+                    aria-label="{{ theme.name }}: {{ theme.tagline }}"
+                    title="{{ theme.tagline }}"
+                >
+                    <span class="theme-dot theme-dot-{{ theme.key }}" aria-hidden="true"></span>
+                    <span class="theme-name">{{ theme.name }}</span>
+                </button>
+            {% endfor %}
+        </div>
+
+        <div class="reader-meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ initial_percentage }}" aria-label="Reading progress">
+            <span class="reader-meter-fill" data-reader-meter style="width: {{ initial_percentage }}%"></span>
+        </div>
+    </div>
+
+    <section class="reader-stage" aria-label="Story pages">
+        <div class="reader-book" data-reader-book>
+            <div class="reader-book-edge" aria-hidden="true"></div>
+            <div class="reader-particles" data-reader-particles aria-hidden="true"></div>
+            <div class="reader-scanlines" aria-hidden="true"></div>
+
+            <div class="reader-pages" data-reader-pages>
+                {% for page in pages %}
+                    <article
+                        class="reader-page{% if page.page_number == initial_page %} is-active{% endif %}"
+                        data-page="{{ page.page_number }}"
+                        data-animation="{{ page.animation_type }}"
+                        aria-hidden="{% if page.page_number == initial_page %}false{% else %}true{% endif %}"
+                        {% if page.page_number == initial_page %}tabindex="0"{% endif %}
+                    >
+                        <div class="reader-art{% if page.illustration_url %} has-image{% else %} reader-art-scene reader-art-scene-{{ page.page_number }}{% endif %}">
+                            {% if page.illustration_url %}
+                                <img
+                                    src="{{ page.illustration_url }}"
+                                    alt="Illustration for page {{ page.page_number }} of {{ book.title }}"
+                                    loading="{% if page.page_number == initial_page %}eager{% else %}lazy{% endif %}"
+                                >
+                            {% else %}
+                                <span class="art-sky" aria-hidden="true"></span>
+                                <span class="art-sun" aria-hidden="true"></span>
+                                <span class="art-hill art-hill-a" aria-hidden="true"></span>
+                                <span class="art-hill art-hill-b" aria-hidden="true"></span>
+                                <span class="art-number" aria-hidden="true">{{ page.page_number }}</span>
+                                <span class="art-spark art-spark-a" aria-hidden="true">✦</span>
+                                <span class="art-spark art-spark-b" aria-hidden="true">✦</span>
+                                <span class="art-caption">{{ book.get_theme_default_display }}</span>
+                            {% endif %}
+                            <span class="art-page-tag">Page {{ page.page_number }}</span>
+                        </div>
+
+                        <div class="reader-copy">
+                            <span class="reader-page-label">Page {{ page.page_number }}</span>
+                            <div class="reader-text-body">
+                                <p class="reader-text">{{ page.content_text|linebreaksbr }}</p>
+                            </div>
+                            <span class="reader-ornament" aria-hidden="true">✦</span>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+
+            <span class="reader-corner reader-corner-a" aria-hidden="true">✦</span>
+            <span class="reader-corner reader-corner-b" aria-hidden="true">✦</span>
+        </div>
+
+        <div class="reader-controls">
+            <button class="reader-nav reader-nav-prev" type="button" data-reader-prev aria-label="Previous page">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M15 5 8 12l7 7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+
+            <div class="reader-pagination">
+                <div class="reader-dots" data-reader-dots role="group" aria-label="Go to page">
+                    {% for page in pages %}
+                        <button
+                            class="reader-dot{% if page.page_number == initial_page %} is-current{% endif %}"
+                            type="button"
+                            data-reader-dot="{{ forloop.counter0 }}"
+                            aria-label="Page {{ page.page_number }}"
+                            aria-current="{% if page.page_number == initial_page %}page{% else %}false{% endif %}"
+                        ></button>
+                    {% endfor %}
+                </div>
+                <p class="reader-hint">
+                    <kbd>←</kbd><kbd>→</kbd> keys, swipe, or the arrows
+                </p>
+            </div>
+
+            <button class="reader-nav reader-nav-next" type="button" data-reader-next aria-label="Next page">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="m9 5 7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="reader-endnote" data-reader-endnote hidden>
+            <span class="reader-endnote-spark" aria-hidden="true">✦</span>
+            <p><strong>The End.</strong> You finished {{ book.title }}.</p>
+            <div class="reader-endnote-actions">
+                <a class="reader-endnote-button" href="{% url 'books:recap' book.slug %}">Story recap</a>
+                <button class="reader-endnote-button" type="button" data-reader-restart>Read again</button>
+                <a class="reader-endnote-link" href="{% url 'books:child_dashboard' %}">Back to my shelf</a>
+            </div>
+        </div>
+
+        <p class="sr-only" data-reader-announcement aria-live="polite"></p>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/reader.js' %}" defer></script>
+{% endblock %}

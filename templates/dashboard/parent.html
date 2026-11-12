@@ -1,0 +1,407 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Family dashboard — WBooks{% endblock %}
+{% block body_class %}page-dashboard page-parent{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/parent.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="dashboard-hero">
+    <div class="container">
+        <div class="dashboard-heading">
+            <div>
+                <p class="eyebrow">Family dashboard</p>
+                <h1>Good to see you, {{ user.first_name_only }}.</h1>
+                <p class="dashboard-lead">Every reader, every page, all in one calm little corner.</p>
+            </div>
+            <div class="dashboard-heading-actions">
+                <a class="button button-secondary" href="{% url 'books:home' %}#library">Browse library</a>
+            </div>
+        </div>
+
+        <div class="dashboard-stats">
+            <article class="dash-stat">
+                <span class="dash-stat-icon icon-forest" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M8 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM16.5 11a3 3 0 1 0 0-6"/>
+                        <path d="M2.5 20v-1.5A5.5 5.5 0 0 1 8 13h1a5.5 5.5 0 0 1 5.5 5.5V20M16 13h.8a4.7 4.7 0 0 1 4.7 4.7V20"/>
+                    </svg>
+                </span>
+                <div>
+                    <strong>{{ children_count }}</strong>
+                    <span>linked young reader{{ children_count|pluralize }}</span>
+                </div>
+            </article>
+            <article class="dash-stat">
+                <span class="dash-stat-icon icon-castle" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M12 3 4 7v6c0 4 3.4 7.2 8 8 4.6-.8 8-4 8-8V7l-8-4Z"/>
+                        <path d="m9 12 2 2 4-4"/>
+                    </svg>
+                </span>
+                <div>
+                    <strong>{{ family.books_completed }}</strong>
+                    <span>stories finished</span>
+                </div>
+            </article>
+            <article class="dash-stat">
+                <span class="dash-stat-icon icon-ocean" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Z"/>
+                        <path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H20"/>
+                    </svg>
+                </span>
+                <div>
+                    <strong>{{ family.reading_time_label }}</strong>
+                    <span>reading time logged</span>
+                </div>
+            </article>
+            <article class="dash-stat">
+                <span class="dash-stat-icon icon-space" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="m12 3 2.3 5.1L19.5 8l-3.6 4 1 5.6L12 15l-4.9 2.6 1-5.6-3.6-4 5.2.1L12 3Z"/>
+                    </svg>
+                </span>
+                <div>
+                    <strong>
+                        {% if family.average_score %}{{ family.average_score }}%{% else %}—{% endif %}
+                    </strong>
+                    <span>average quiz score</span>
+                </div>
+            </article>
+        </div>
+    </div>
+</section>
+
+<section class="section dashboard-body">
+    <div class="container dashboard-grid">
+        <div class="dashboard-main">
+            <!-- ------------------------------------------------ goal + chart -->
+            <div class="panel pd-goal-panel">
+                <div class="pd-goal-ring" style="--goal: {{ goal_percentage }}%" role="img" aria-label="Today's reading goal is {{ goal_percentage }} percent complete">
+                    <span class="pd-goal-core">
+                        <strong>{{ minutes_today }}</strong>
+                        <span>of {{ goal_minutes }} min</span>
+                    </span>
+                </div>
+                <div class="pd-goal-copy">
+                    <p class="eyebrow">Today's reading goal</p>
+                    <h2>
+                        {% if minutes_today >= goal_minutes %}
+                            Goal reached — wonderful reading.
+                        {% elif minutes_today > 0 %}
+                            {{ minutes_remaining }} minute{{ minutes_remaining|pluralize }} to go.
+                        {% else %}
+                            No reading minutes logged yet today.
+                        {% endif %}
+                    </h2>
+                    <p class="panel-copy">
+                        A small daily habit is what turns into a lifelong reader.
+                        WBooks counts every minute your young reader spends with a story.
+                    </p>
+                </div>
+                <div class="pd-chart" aria-hidden="true">
+                    {% for point in weekly_chart %}
+                        <div class="pd-chart-column" title="{{ point.date_label }} · {{ point.minutes }} min">
+                            <span class="pd-chart-bar" style="height: {{ point.height }}%"></span>
+                            <span class="pd-chart-label">{{ point.label }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- ------------------------------------------------------- readers -->
+            <div class="panel-heading pd-section-heading">
+                <div>
+                    <p class="eyebrow">Your readers</p>
+                    <h2>Little reading journeys</h2>
+                </div>
+                <span class="page-pill">{{ reports|length }} reader{{ reports|length|pluralize }}</span>
+            </div>
+
+            <div class="child-grid pd-reader-grid">
+                {% for report in reports %}
+                    <article class="child-card pd-reader-card reveal">
+                        <div class="child-card-head">
+                            <span class="avatar avatar-lg">{{ report.child.first_name_only|slice:":1"|upper }}</span>
+                            <div class="child-identity">
+                                <h3>{{ report.child.display_name|default:report.child.username }}</h3>
+                                <span>{{ report.child.email }}</span>
+                            </div>
+                            <span class="child-role-pill">Reader</span>
+                        </div>
+
+                        <div class="child-metrics pd-reader-metrics">
+                            <div>
+                                <strong>{{ report.books_started }}</strong>
+                                <span>started</span>
+                            </div>
+                            <div>
+                                <strong>{{ report.books_completed }}</strong>
+                                <span>finished</span>
+                            </div>
+                            <div>
+                                <strong>{{ report.pages_read }}</strong>
+                                <span>pages read</span>
+                            </div>
+                            <div>
+                                <strong>{{ report.reading_time_label }}</strong>
+                                <span>time spent</span>
+                            </div>
+                        </div>
+
+                        {% if report.quizzes_taken %}
+                            <div class="pd-score-row">
+                                <span class="pd-score-label">Quiz average</span>
+                                <span class="pd-score-value">
+                                    {% if report.average_score is not None %}{{ report.average_score }}%{% else %}—{% endif %}
+                                </span>
+                                <span class="pd-score-meta">
+                                    {{ report.quizzes_taken }} taken · {{ report.passed_quizzes }} passed
+                                    {% if report.best_score %} · best {{ report.best_score }}%{% endif %}
+                                </span>
+                            </div>
+                        {% endif %}
+
+                        {% with entries=report.progress_entries %}
+                            {% if entries %}
+                                <ul class="child-reading-list pd-progress-list">
+                                    {% for entry in entries|slice:":4" %}
+                                        <li>
+                                            <div class="child-reading-copy">
+                                                <a href="{{ entry.book.get_absolute_url }}">{{ entry.book.title }}</a>
+                                                <span>
+                                                    {% if entry.is_completed %}
+                                                        Finished · {{ entry.reading_time_label }} read
+                                                    {% else %}
+                                                        Page {{ entry.current_page }} of {{ pages_per_book }}
+                                                        {% if entry.reading_time_label != "0m" %}· {{ entry.reading_time_label }} read{% endif %}
+                                                    {% endif %}
+                                                </span>
+                                            </div>
+                                            <div class="mini-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ entry.percentage }}">
+                                                <span style="width: {{ entry.percentage }}%"></span>
+                                            </div>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="child-empty">No stories on the shelf yet. Browse the library together to begin.</p>
+                            {% endif %}
+                        {% endwith %}
+
+                        {% if report.quiz_results %}
+                            <div class="pd-quiz-list">
+                                <p class="pd-quiz-heading">Recent quiz scores</p>
+                                <ul>
+                                    {% for result in report.quiz_results|slice:":3" %}
+                                        <li class="pd-quiz-item {% if result.is_passed %}is-passed{% else %}is-missed{% endif %}">
+                                            <span class="pd-quiz-score">{{ result.score_percentage }}%</span>
+                                            <span class="pd-quiz-name">
+                                                {% if result.book %}{{ result.book.title }} quiz{% else %}Wonder Quiz{% endif %}
+                                            </span>
+                                            <span class="pd-quiz-date">{{ result.created_at|timesince }} ago</span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+
+                        {% if report.badges %}
+                            <div class="pd-badge-row">
+                                <p class="pd-quiz-heading">
+                                    {{ report.badge_count }} badge{{ report.badge_count|pluralize }} earned
+                                </p>
+                                <ul class="pd-badge-chips">
+                                    {% for badge in report.badges %}
+                                        <li class="pd-badge-chip" title="{{ badge.description }}">
+                                            <span aria-hidden="true">{{ badge.icon }}</span>
+                                            {{ badge.name }}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% else %}
+                            <p class="pd-empty-note">
+                                No badges yet — finish a story to unlock the first one.
+                            </p>
+                        {% endif %}
+                    </article>
+                {% empty %}
+                    <div class="empty-state empty-state-compact">
+                        <span class="empty-glyph" aria-hidden="true">✦</span>
+                        <h3>No readers linked yet.</h3>
+                        <p>Ask your young reader to create a child account, then link it here with their email.</p>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- --------------------------------------------- reading time split -->
+            {% if book_times %}
+                <div class="panel pd-time-panel">
+                    <div class="panel-heading">
+                        <div>
+                            <p class="eyebrow">Reading time</p>
+                            <h2>Where the minutes went</h2>
+                        </div>
+                        <span class="page-pill">{{ family.reading_time_label }} total</span>
+                    </div>
+                    <ul class="pd-time-list">
+                        {% for entry in book_times %}
+                            <li>
+                                <div class="pd-time-copy">
+                                    <span class="pd-time-title">{{ entry.title }}</span>
+                                    <span class="pd-time-value">{{ entry.label }}</span>
+                                </div>
+                                <div class="pd-time-bar">
+                                    <span style="width: {{ entry.percent }}%"></span>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <!-- ------------------------------------------------ family activity -->
+            <div class="panel family-activity">
+                <div class="panel-heading">
+                    <div>
+                        <p class="eyebrow">Family activity</p>
+                        <h2>Recently turned pages</h2>
+                    </div>
+                </div>
+                {% if family_progress %}
+                    <ul class="activity-list">
+                        {% for entry in family_progress %}
+                            <li>
+                                <span class="avatar avatar-sm">{{ entry.child.first_name_only|slice:":1"|upper }}</span>
+                                <div class="activity-copy">
+                                    <p>
+                                        <strong>{{ entry.child.first_name_only }}</strong>
+                                        {% if entry.is_completed %}
+                                            finished <a href="{{ entry.book.get_absolute_url }}">{{ entry.book.title }}</a>.
+                                        {% else %}
+                                            is on page {{ entry.current_page }} of <a href="{{ entry.book.get_absolute_url }}">{{ entry.book.title }}</a>.
+                                        {% endif %}
+                                    </p>
+                                    <span>{{ entry.updated_at|timesince }} ago</span>
+                                </div>
+                                <span class="activity-badge {% if entry.is_completed %}badge-done{% endif %}">
+                                    {% if entry.is_completed %}Done{% else %}{{ entry.percentage }}%{% endif %}
+                                </span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="panel-empty">Reading activity will appear here as your family explores the library.</p>
+                {% endif %}
+
+                {% if recent_quizzes %}
+                    <div class="pd-recent-quizzes">
+                        <p class="pd-quiz-heading">Latest quiz attempts</p>
+                        <ul class="pd-recent-list">
+                            {% for result in recent_quizzes %}
+                                <li>
+                                    <span class="avatar avatar-sm">{{ result.child.first_name_only|slice:":1"|upper }}</span>
+                                    <div class="activity-copy">
+                                        <p>
+                                            <strong>{{ result.child.first_name_only }}</strong>
+                                            scored {{ result.score_percentage }}% on
+                                            {% if result.book %}{{ result.book.title }}{% else %}the Wonder Quiz{% endif %}.
+                                        </p>
+                                        <span>{{ result.created_at|timesince }} ago</span>
+                                    </div>
+                                    <span class="activity-badge {% if result.is_passed %}badge-done{% endif %}">
+                                        {{ result.score_percentage }}%
+                                    </span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- ------------------------------------------------- badge catalogue -->
+            {% if badge_catalogue %}
+                <div class="panel pd-badge-panel">
+                    <div class="panel-heading">
+                        <div>
+                            <p class="eyebrow">Rewards</p>
+                            <h2>Badges your family is chasing</h2>
+                        </div>
+                        <span class="page-pill">{{ family.badge_count }} earned</span>
+                    </div>
+                    <div class="badge-grid pd-badge-grid">
+                        {% for card in badge_catalogue %}
+                            <article class="badge-card{% if card.earned %} is-earned{% else %} is-locked{% endif %}">
+                                <span class="badge-card-icon" aria-hidden="true">
+                                    {% if card.earned %}{{ card.badge.icon }}{% else %}<span class="badge-card-lock">✦</span>{% endif %}
+                                </span>
+                                <div class="badge-card-copy">
+                                    <p class="badge-card-kicker">
+                                        {% if card.earned %}Earned{% else %}Locked{% endif %}
+                                    </p>
+                                    <h3>{{ card.badge.name }}</h3>
+                                    <p>{{ card.badge.description }}</p>
+                                    <span class="badge-card-date">{{ card.progress }}</span>
+                                </div>
+                                {% if card.earned %}<span class="badge-card-spark" aria-hidden="true">✦</span>{% endif %}
+                            </article>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <aside class="dashboard-side">
+            <div class="panel panel-sticky">
+                <div class="panel-heading">
+                    <div>
+                        <p class="eyebrow">Grow the family shelf</p>
+                        <h2>Link a reader</h2>
+                    </div>
+                </div>
+                <p class="panel-copy">
+                    Already created a child account? Add it to your family using the email address
+                    on that account. Each reader can belong to one guardian.
+                </p>
+                <form method="post" class="stacked-form">
+                    {% csrf_token %}
+                    {% include "partials/field.html" with field=link_form.child_email %}
+                    <button class="button button-primary button-block" type="submit">Link this reader</button>
+                </form>
+                <div class="panel-hint">
+                    <span aria-hidden="true">✦</span>
+                    <p>Need a second reader profile? <a href="{% url 'books:register' %}">Create one here</a>, then come back to link it.</p>
+                </div>
+            </div>
+
+            <div class="panel pd-summary-panel">
+                <div class="panel-heading">
+                    <div>
+                        <p class="eyebrow">This month</p>
+                        <h2>Family snapshot</h2>
+                    </div>
+                </div>
+                <ul class="pd-summary-list">
+                    <li><span>Pages read</span><strong>{{ family.pages_read }}</strong></li>
+                    <li><span>Stories finished</span><strong>{{ family.books_completed }}</strong></li>
+                    <li><span>Quizzes taken</span><strong>{{ family.quizzes_taken }}</strong></li>
+                    <li><span>Time reading</span><strong>{{ family.reading_time_label }}</strong></li>
+                    <li><span>Badges earned</span><strong>{{ family.badge_count }}</strong></li>
+                    <li><span>Best score</span><strong>{% if family.best_score %}{{ family.best_score }}%{% else %}—{% endif %}</strong></li>
+                </ul>
+            </div>
+
+            <div class="panel panel-note">
+                <span class="panel-note-art" aria-hidden="true">✦</span>
+                <h3>A little encouragement goes far.</h3>
+                <p>Ask your reader what happened on their last page — retelling a story builds comprehension and keeps the wonder going.</p>
+            </div>
+        </aside>
+    </div>
+</section>
+{% endblock %}

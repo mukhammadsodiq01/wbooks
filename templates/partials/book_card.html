@@ -1,0 +1,42 @@
+{% load static %}
+<article class="book-card reveal" data-age="{{ book.age_group }}">
+    <a class="book-cover theme-{{ book.theme_default }}" href="{{ book.get_absolute_url }}" aria-label="{{ book.title }} hikoyasini ochish">
+        {% if book.cover_image %}
+            <img src="{{ book.cover_image.url }}" alt="{{ book.title }} muqovasi" loading="lazy">
+        {% else %}
+            <span class="cover-spark cover-spark-a" aria-hidden="true">✦</span>
+            <span class="cover-spark cover-spark-b" aria-hidden="true">✦</span>
+            <span class="cover-letter" aria-hidden="true">{{ book.title|slice:":1" }}</span>
+            <span class="cover-title">{{ book.title }}</span>
+        {% endif %}
+        <span class="age-pill">{{ book.get_age_group_display }}</span>
+        {% if book.user_progress.is_completed %}
+            <span class="cover-badge">Tugatildi ✓</span>
+        {% endif %}
+    </a>
+    <div class="book-card-body">
+        <p class="book-kicker">
+            {{ book.get_theme_default_display }}
+            <span aria-hidden="true">·</span>
+            {{ book.page_total|default:book.page_count }} sahifa
+        </p>
+        <h3><a href="{{ book.get_absolute_url }}">{{ book.title }}</a></h3>
+        <p class="book-description">{{ book.description|truncatewords:16 }}</p>
+        {% if book.user_progress %}
+            <div class="mini-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ book.user_progress.percentage }}" aria-label="O‘qish jarayoni">
+                <span style="width: {{ book.user_progress.percentage }}%"></span>
+            </div>
+            <p class="progress-caption">
+                {% if book.user_progress.is_completed %}
+                    Hikoya to‘liq o‘qib chiqildi.
+                {% else %}
+                    {{ book.user_progress.current_page }} / {{ book.page_total|default:8 }} sahifa
+                {% endif %}
+            </p>
+        {% endif %}
+        <a class="text-link" href="{% if book.user_progress %}{% url 'books:reader' book.slug %}{% else %}{{ book.get_absolute_url }}{% endif %}">
+            {% if book.user_progress %}Davom ettirish{% else %}Hikoyani ochish{% endif %}
+            <span aria-hidden="true">→</span>
+        </a>
+    </div>
+</article>

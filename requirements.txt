@@ -1,0 +1,12 @@
+# Django
+Django>=6.1,<6.2
+djangorestframework>=3.18,<3.19
+
+# Database driver (PostgreSQL)
+psycopg[binary]>=3.2,<4
+
+# Image uploads (book covers, avatars)
+Pillow>=13,<14
+
+# Production WSGI server
+gunicorn>=23,<24; sys_platform != "win32"

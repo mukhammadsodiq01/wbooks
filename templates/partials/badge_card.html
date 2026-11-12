@@ -1,0 +1,19 @@
+{% comment %}
+Badge shelf card. Expects ``card`` with badge, earned and award.
+{% endcomment %}
+<article class="badge-card{% if card.earned %} is-earned{% else %} is-locked{% endif %}">
+    <span class="badge-card-icon" aria-hidden="true">
+        {% if card.earned %}{{ card.badge.icon }}{% else %}<span class="badge-card-lock">✦</span>{% endif %}
+    </span>
+    <div class="badge-card-copy">
+        <p class="badge-card-kicker">
+            {% if card.earned %}Earned{% else %}Locked{% endif %}
+        </p>
+        <h3>{{ card.badge.name }}</h3>
+        <p>{{ card.badge.description }}</p>
+        {% if card.earned and card.award %}
+            <span class="badge-card-date">{{ card.award.awarded_at|date:"M j, Y" }}</span>
+        {% endif %}
+    </div>
+    {% if card.earned %}<span class="badge-card-spark" aria-hidden="true">✦</span>{% endif %}
+</article>
